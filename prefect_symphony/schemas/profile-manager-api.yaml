@@ -1,0 +1,1078 @@
+components:
+  requestBodies:
+    AddMemberRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/addMember'
+      description: JSON object containing the user member information and the group
+        on which he will be added to
+      required: true
+    CreateGroupBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateGroup'
+      description: JSON object containing Group info
+      required: true
+    UpdateAvatar:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UploadAvatar'
+      description: JSON object containing Group avatar
+      required: true
+    UpdateGroupBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateGroup'
+      description: JSON object containing Group info
+      required: true
+  responses:
+    InfoBarrierViolation:
+      content:
+        application/json:
+          schema:
+            $ref: ./symphony-common-definitions.yaml#/components/schemas/Error
+      description: Info barrier violation found between group account's members.
+    TooManyRequests:
+      content:
+        application/json:
+          schema:
+            $ref: ./symphony-common-definitions.yaml#/components/schemas/Error
+      description: Too Many Requests
+  schemas:
+    Avatar:
+      properties:
+        size:
+          type: string
+        url:
+          type: string
+    BaseGroup:
+      description: A reduced set Group object, for retrieving list of group purpose
+      properties:
+        name:
+          description: Group's name
+          example: Test Group
+          minLength: 1
+          nullable: false
+          type: string
+        ownerId:
+          description: Owner id if the owner type is tenant (podId) or user (userId),
+            otherwise null
+          example: 100
+          format: int64
+          type: integer
+        ownerType:
+          $ref: '#/components/schemas/Owner'
+          nullable: false
+        type:
+          description: Group type identifier
+          example: SDL
+          minLength: 1
+          nullable: false
+          type: string
+      required:
+      - type
+      - ownerType
+      - ownerId
+      - name
+    BaseProfile:
+      description: The group's profile. Please note that in case of a company group
+        type, the profile shouldn't be provided when creating a new company and do
+        not exist in case of an existing company group
+      properties:
+        assetClassesOfInterest:
+          example:
+          - Equities
+          items:
+            type: string
+          type: array
+        companyName:
+          description: The company name is expected to be the same as group company
+            owner
+          example: Acme Corporation
+          type: string
+        displayName:
+          description: The display name in Directory, it is expected to be the same
+            as group name
+          example: Test Group
+          minLength: 1
+          nullable: false
+          type: string
+        email:
+          example: testgroup@acme.com
+          type: string
+        function:
+          example:
+          - Collateral
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+        industryOfInterest:
+          example:
+          - Services
+          items:
+            type: string
+          type: array
+        instrument:
+          example:
+          - Equities
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+        jobCity:
+          type: string
+        jobDepartment:
+          type: string
+        jobDivision:
+          type: string
+        jobPhone:
+          type: string
+        jobRole:
+          example: Director
+          type: string
+        jobTitle:
+          type: string
+        marketCoverage:
+          example:
+          - EMEA
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+        mobile:
+          example: +33(0)600000000
+          type: string
+        responsibility:
+          example:
+          - Escalation
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+    BaseType:
+      description: A reduced set Type object, for retrieving list of types purpose
+      properties:
+        id:
+          description: Type identifier
+          example: SDL
+          type: string
+        name:
+          description: Type's name
+          example: Symphony Distribution List
+          type: string
+        ownerType:
+          $ref: '#/components/schemas/Owner'
+          example: TENANT
+        status:
+          $ref: '#/components/schemas/Status'
+    CreateGroup:
+      allOf:
+      - $ref: '#/components/schemas/BaseGroup'
+      - properties:
+          implicitConnection:
+            $ref: '#/components/schemas/GroupImplicitConnection'
+          interactionTransfer:
+            $ref: '#/components/schemas/GroupInteractionTransfer'
+          members:
+            items:
+              $ref: '#/components/schemas/Member'
+            type: array
+          profile:
+            $ref: '#/components/schemas/BaseProfile'
+            description: The profile is not supported for company group, but only
+              works with SDL as group type
+            required: true
+          referrer:
+            description: The referring company name. This field is mandatory in case
+              of a company group type, but not applicable for Symphony Distribution
+              List
+            example: Symphony, referring company name, referring channel partner name
+            type: string
+          subType:
+            description: The type of the company group, This field is mandatory in
+              case of a company group type, but not applicable for Symphony Distribution
+              List
+            enum:
+            - COMMUNITY
+            - CHANNEL
+            example: COMMUNITY
+            type: string
+          visibilityRestriction:
+            $ref: '#/components/schemas/GroupVisibilityRestriction'
+        required:
+        - rootCause
+        type: object
+    GroupImplicitConnection:
+      description: Group implicit connections.
+      properties:
+        connectedTenantsList:
+          example:
+          - 100
+          items:
+            type: integer
+          type: array
+        connectedUsersList:
+          example:
+          - 12345678900000
+          items:
+            format: int64
+            type: integer
+          type: array
+    GroupInteractionTransfer:
+      description: Group interaction transfer.
+      properties:
+        restrictedTenantsList:
+          example:
+          - 100
+          items:
+            type: integer
+          type: array
+        restrictedUsersList:
+          example:
+          - 12345678900000
+          items:
+            format: int64
+            type: integer
+          type: array
+    GroupList:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/ReadGroup'
+          type: array
+        pagination:
+          $ref: ./symphony-common-definitions.yaml#/components/schemas/Pagination
+    GroupVisibilityRestriction:
+      description: Group visibility restriction.
+      properties:
+        restrictedTenantsList:
+          example:
+          - 100
+          items:
+            type: integer
+          type: array
+        restrictedUsersList:
+          example:
+          - 12345678900000
+          items:
+            format: int64
+            type: integer
+          type: array
+    ImplicitConnection:
+      properties:
+        all:
+          type: boolean
+        connectToTenants:
+          description: Not supported yet
+          type: boolean
+        connectToUsers:
+          description: Not supported yet
+          type: boolean
+    InteractionControl:
+      properties:
+        allowIMs:
+          type: boolean
+        allowRooms:
+          type: boolean
+        canHaveInteraction:
+          default: true
+          description: For the SDL groupe type this flag is true, for the company
+            groupe type it is false
+          type: boolean
+        interactionTransfer:
+          $ref: '#/components/schemas/InteractionTransfer'
+        tagStream:
+          type: string
+    InteractionTransfer:
+      properties:
+        auditTransfer:
+          type: boolean
+        systemMessageOnInteraction:
+          description: Not supported yet
+          type: boolean
+        target:
+          description: Only TO_MEMBERS supported now
+          enum:
+          - TO_USER
+          - TO_MEMBERS
+          - NONE
+          example: TO_MEMBERS
+          type: string
+        transferView:
+          $ref: '#/components/schemas/TransferView'
+        updateInteractionOngroupUpdate:
+          type: boolean
+    Member:
+      description: A Group member.
+      properties:
+        memberId:
+          description: Member's user id
+          example: 12345678900000
+          format: int64
+          nullable: false
+          type: integer
+        memberTenant:
+          description: Member's tenant id
+          example: 100
+          nullable: false
+          type: integer
+    MembershipControl:
+      properties:
+        canBelongToMultipleGroup:
+          default: true
+          description: For the SDL groupe type this flag is true, for the company
+            groupe type it is false
+          type: boolean
+        entitlements:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+        manualMembership:
+          type: boolean
+        notifyMembersOnUpdate:
+          type: boolean
+        ruleMembership:
+          description: Not supported yet
+          type: boolean
+        updateMembershipOnRuleUpdate:
+          description: Not supported yet
+          type: boolean
+    Owner:
+      description: Owner type. Ony TENANT supported now
+      enum:
+      - PLATFORM
+      - TENANT
+      - USER
+      example: TENANT
+      type: string
+    Profile:
+      allOf:
+      - $ref: '#/components/schemas/BaseProfile'
+      - properties:
+          avatars:
+            items:
+              $ref: '#/components/schemas/Avatar'
+            type: array
+          id:
+            description: Profile unique identifier
+            type: string
+        required:
+        - rootCause
+        type: object
+    ProfileControl:
+      properties:
+        canHavePublicProfile:
+          default: true
+          description: For the SDL groupe type this flag is true, for the company
+            groupe type it is false
+          type: boolean
+        implicitConnection:
+          $ref: '#/components/schemas/ImplicitConnection'
+        profileFields:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+        searchFields:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+        visibilityRestriction:
+          $ref: '#/components/schemas/VisibilityRestriction'
+        wallSupport:
+          description: Not supported yet
+          type: boolean
+    ReadGroup:
+      allOf:
+      - $ref: '#/components/schemas/BaseGroup'
+      - properties:
+          createdBy:
+            type: string
+          createdDate:
+            format: date-time
+            type: string
+          eTag:
+            example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+            type: string
+          id:
+            description: Group's unique identifier
+            type: string
+          implicitConnection:
+            $ref: '#/components/schemas/GroupImplicitConnection'
+          interactionTransfer:
+            $ref: '#/components/schemas/GroupInteractionTransfer'
+          members:
+            items:
+              $ref: '#/components/schemas/ReadMember'
+            type: array
+          profile:
+            $ref: '#/components/schemas/Profile'
+            description: The profile is not supported for company group, but only
+              works with SDL as group type
+          referrer:
+            description: The referring company name. This field is mandatory in case
+              of a company group type, but not applicable for Symphony Distribution
+              List
+            example: Symphony, referring company name, referring channel partner name
+            type: string
+          status:
+            $ref: '#/components/schemas/Status'
+          subType:
+            description: The type of the company group, This field is mandatory in
+              case of a company group type, but not applicable for Symphony Distribution
+              List
+            enum:
+            - COMMUNITY
+            - CHANNEL
+            example: COMMUNITY
+            type: string
+          updatedBy:
+            type: string
+          updatedDate:
+            format: date-time
+            type: string
+          visibilityRestriction:
+            $ref: '#/components/schemas/GroupVisibilityRestriction'
+        required:
+        - rootCause
+        type: object
+    ReadMember:
+      allOf:
+      - $ref: '#/components/schemas/Member'
+      - properties:
+          addedDate:
+            description: Date/time when the member has been added in the group in
+              ISO-8601 format (YYYY-MM-DDThh:mm:ss.sZ)
+            format: date-time
+            type: string
+          status:
+            description: Some group types (e.g. COMPANY) keep disabled users, flagging
+              them as DISABLED. However, this attribute is not relevant for group
+              types (e.g. SDL) that remove (instead of flag) disabled user from group
+            enum:
+            - ENABLED
+            - DISABLED
+            example: ENABLED
+            type: string
+        required:
+        - rootCause
+        type: object
+    SortOrder:
+      description: Sort query order
+      enum:
+      - ASC
+      - DESC
+      example: ASC
+      type: string
+    Status:
+      description: Status flag to distinguish between active and deleted objects
+      enum:
+      - ACTIVE
+      - DELETED
+      example: ACTIVE
+      type: string
+    TransferView:
+      properties:
+        restrictToTenants:
+          type: boolean
+        restrictToUsers:
+          description: Not supported yet
+          type: boolean
+        visible:
+          type: boolean
+    Type:
+      allOf:
+      - $ref: '#/components/schemas/BaseType'
+      - properties:
+          interactionControl:
+            $ref: '#/components/schemas/InteractionControl'
+          membershipControl:
+            $ref: '#/components/schemas/MembershipControl'
+          profileControl:
+            $ref: '#/components/schemas/ProfileControl'
+        required:
+        - rootCause
+        type: object
+    TypeList:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/BaseType'
+          type: array
+        pagination:
+          $ref: ./symphony-common-definitions.yaml#/components/schemas/Pagination
+    UpdateGroup:
+      allOf:
+      - $ref: '#/components/schemas/CreateGroup'
+      - properties:
+          eTag:
+            example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+            minLength: 1
+            nullable: false
+            type: string
+          id:
+            description: Group's unique identifier
+            example: 60af77fd294165466ccdf510
+            minLength: 1
+            nullable: false
+            type: string
+          status:
+            $ref: '#/components/schemas/Status'
+        required:
+        - rootCause
+        type: object
+    UploadAvatar:
+      properties:
+        image:
+          description: 'The avatar image for the user profile picture.The image must
+            be a base64-encoded .jpg, .png, or .gif. >- Image size limit: 2 MB'
+          format: byte
+          nullable: false
+          type: string
+    VisibilityRestriction:
+      properties:
+        restrictToTenants:
+          description: Not supported yet
+          type: boolean
+        restrictToUsers:
+          description: Not supported yet
+          type: boolean
+        visible:
+          type: boolean
+    addMember:
+      properties:
+        member:
+          $ref: '#/components/schemas/Member'
+          nullable: false
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Use Common JWT
+      scheme: bearer
+      type: http
+info:
+  description: Profile Manager is a microservice to manage users profile and groups
+  title: Symphony Profile Manager
+  version: 1.0.0
+openapi: 3.0.0
+paths:
+  /v1/groups:
+    post:
+      description: Insert a new group into database
+      operationId: insertGroup
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/CreateGroupBody'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadGroup'
+          description: Successful response. Returns the group just created with the
+            new added member
+          headers:
+            Etag:
+              schema:
+                example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+                type: string
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters, Trying to add a member
+            which is already existing within the group list of members, or the requested
+            user member is already a part of company group in case of a company group
+            type
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+        '452':
+          $ref: '#/components/responses/InfoBarrierViolation'
+          description: Returned if there is a violation in info barrier rules. This
+            error is not relevant in case of a Company group
+      summary: Insert a new group
+      tags:
+      - group
+  /v1/groups/deleteAll:
+    delete:
+      operationId: deleteAllGroups
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupList'
+          description: Successful response. Returns the list of all groups (it should
+            be empty)
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters or wrong parameters
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+      summary: Delete all data related to the current pod (extracted from JWT). This
+        endpoint is for maintenance/test and it is usually disabled or restricted
+      tags:
+      - group
+  /v1/groups/type/{typeId}:
+    get:
+      operationId: listGroups
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      - description: Group type id
+        example: SDL
+        in: path
+        name: typeId
+        required: true
+        schema:
+          type: string
+      - description: filter by status, active or deleted. If not specified both are
+          returned
+        example: ACTIVE
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: '#/components/schemas/Status'
+      - description: NOT SUPPORTED YET, currently ignored. Cursor that points to the
+          start of the current page of data. If not present, the current page is the
+          first page
+        in: query
+        name: before
+        required: false
+        schema:
+          type: string
+      - description: cursor that points to the end of the current page of data. If
+          not present, the current page is the last page
+        in: query
+        name: after
+        required: false
+        schema:
+          type: string
+      - description: numbers of items to return
+        example: 100
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+      - description: items sorting direction (ordered by createdDate)
+        example: ASC
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          $ref: '#/components/schemas/SortOrder'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupList'
+          description: Successful response. Returns the list of all groups
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters or wrong parameters
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '404':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/NotFound
+          description: Returned if typeId is not found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+      summary: List all groups of specified type
+      tags:
+      - group
+  /v1/groups/{groupId}:
+    get:
+      description: Retrieve a group
+      operationId: getGroup
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      - description: Group id
+        example: WzEwMF1bU0RMXVtUZXN0IEdyb3VwXQ
+        in: path
+        name: groupId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadGroup'
+          description: Successful response. Returns the group
+          headers:
+            Etag:
+              schema:
+                example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+                type: string
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters or wrong parameters
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '404':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/NotFound
+          description: Returned if groupId is not found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+      summary: Retrieve a group
+      tags:
+      - group
+    put:
+      description: Update an existing group
+      operationId: updateGroup
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      - in: header
+        name: If-Match
+        required: true
+        schema:
+          description: ETag of group to be updated
+          example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+          type: string
+      - description: Group id
+        example: 60af77fd294165466ccdf510
+        in: path
+        name: groupId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateGroupBody'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadGroup'
+          description: Successful response. Returns the group just updated
+          headers:
+            Etag:
+              schema:
+                example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+                type: string
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters or wrong parameters
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '404':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/NotFound
+          description: Returned if groupId is not found
+        '412':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/PreconditionFailed
+          description: The update is rejected because concurrent update
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+        '452':
+          $ref: '#/components/responses/InfoBarrierViolation'
+          description: Returned if there is a violation in info barrier rules. This
+            error is not relevant in case of a Company group
+      summary: Update a group
+      tags:
+      - group
+  /v1/groups/{groupId}/avatar:
+    post:
+      description: Update the group account avatar
+      operationId: updateAvatar
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      - description: Group id
+        example: 60af77fd294165466ccdf510
+        in: path
+        name: groupId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateAvatar'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadGroup'
+          description: Successful response. Returns the group with the avatar updated
+          headers:
+            Etag:
+              schema:
+                example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+                type: string
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters or wrong parameters
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '404':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/NotFound
+          description: Returned if groupId is not found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+      summary: Update the group avatar
+      tags:
+      - group
+  /v1/groups/{groupId}/member:
+    post:
+      description: Add a new user to a an existing group
+      operationId: addMemberToGroup
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the origin
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      - in: path
+        name: groupId
+        required: true
+        schema:
+          description: Group id
+          example: WzEwMF1bU0RMXVtUZXN0IEdyb3VwXQ
+          nullable: false
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/AddMemberRequestBody'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadGroup'
+          description: Successful response. Returns the group with the new add user
+            as a member
+          headers:
+            Etag:
+              schema:
+                example: e3a52e72-0854-4401-8c24-e0b17c0ca304
+                type: string
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters or wrong parameters
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+        '452':
+          $ref: '#/components/responses/InfoBarrierViolation'
+          description: Returned if there is a violation in info barrier rules. This
+            error is not relevant in case of a Company group
+      summary: Add a new user to a an existing group
+      tags:
+      - group
+  /v1/types:
+    get:
+      operationId: listTypes
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      - example: ACTIVE
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: '#/components/schemas/Status'
+      - description: NOT SUPPORTED YET, currently ignored. Cursor that points to the
+          start of the current page of data. If not present, the current page is the
+          first page
+        in: query
+        name: before
+        required: false
+        schema:
+          type: string
+      - description: cursor that points to the end of the current page of data. If
+          not present, the current page is the last page
+        in: query
+        name: after
+        required: false
+        schema:
+          type: string
+      - description: numbers of items to return
+        example: 100
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+      - description: items sorting direction (ordered by createdDate)
+        example: ASC
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          $ref: '#/components/schemas/SortOrder'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TypeList'
+          description: Successful response. Returns the list of all types
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+      summary: List all types
+      tags:
+      - type
+  /v1/types/{typeId}:
+    get:
+      description: Retrieve a type
+      operationId: getType
+      parameters:
+      - in: header
+        name: X-Symphony-Host
+        required: true
+        schema:
+          description: headers to indentify the originator
+          example: localhost.symphony.com
+          minLength: 1
+          nullable: false
+          type: string
+      - description: Type id
+        example: SDL
+        in: path
+        name: typeId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Type'
+          description: Successful response. Returns the type
+        '400':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/BadRequest
+          description: Returned if missing required parameters or wrong parameters
+        '401':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Unauthorized
+          description: Returned if wrong or missing JWT token
+        '403':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/Forbidden
+          description: Returned if JWT token missing the required entitlement
+        '404':
+          $ref: ./symphony-common-definitions.yaml#/components/responses/NotFound
+          description: Returned if type id is not found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+          description: Returned if the backend is overloaded
+      summary: Retrieve a type
+      tags:
+      - type
+security:
+- bearerAuth: []
+servers:
+- url: /profile-manager

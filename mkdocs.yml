@@ -48,3 +48,41 @@ plugins:
 
 nav:
     - Home: index.md
+    - Admin: admin.md
+    - App: app.md
+    - Audittrail: audittrail.md
+    - Authenticate: authenticate.md
+    - Channelco: channelco.md
+    - Companycert: companycert.md
+    - Connection: connection.md
+    - Credentials: credentials.md
+    - Datafeeds: datafeeds.md
+    - Dlp: dlp.md
+    - Events: events.md
+    - File Ext: file_ext.md
+    - Files: files.md
+    - Health: health.md
+    - Idm: idm.md
+    - Im: im.md
+    - Info: info.md
+    - Languages: languages.md
+    - Logout: logout.md
+    - Message: message.md
+    - Onboarding: onboarding.md
+    - Podcert: podcert.md
+    - Presence: presence.md
+    - Pubkey: pubkey.md
+    - Rest: rest.md
+    - Room: room.md
+    - Sessioninfo: sessioninfo.md
+    - Signals: signals.md
+    - Stream: stream.md
+    - Streams: streams.md
+    - System: system.md
+    - User: user.md
+    - Users: users.md
+    - Util: util.md
+    
+    - Models:
+        - Channelco: models/channelco.md
+        
