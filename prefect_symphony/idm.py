@@ -8,7 +8,7 @@ Symphony idm
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: login-api-public.yaml
-# Updated at: 2022-09-07T03:04:05.677882
+# Updated at: 2022-09-07T03:10:48.512670
 
 from typing import Any, Dict, List, Union  # noqa
 

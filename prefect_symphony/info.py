@@ -8,7 +8,7 @@ Symphony info
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-09-07T03:04:01.824453
+# Updated at: 2022-09-07T03:10:44.721000
 
 from typing import Any, Dict, List, Union  # noqa
 

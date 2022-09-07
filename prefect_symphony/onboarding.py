@@ -8,7 +8,7 @@ Symphony onboarding
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: community-connect-public-api.yaml
-# Updated at: 2022-09-07T03:04:04.778044
+# Updated at: 2022-09-07T03:10:47.570996
 
 from typing import Any, Dict, List, Union  # noqa
 

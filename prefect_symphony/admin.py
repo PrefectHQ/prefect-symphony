@@ -8,7 +8,7 @@ Symphony admin
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: pod-api-public.yaml
-# Updated at: 2022-09-07T03:04:07.518722
+# Updated at: 2022-09-07T03:10:50.374204
 
 from typing import Any, Dict, List, Union  # noqa
 

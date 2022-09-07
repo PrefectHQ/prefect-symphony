@@ -8,7 +8,7 @@ Symphony pubkey
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: login-api-public.yaml
-# Updated at: 2022-09-07T03:04:05.678679
+# Updated at: 2022-09-07T03:10:48.513335
 
 from typing import Any, Dict, List, Union  # noqa
 

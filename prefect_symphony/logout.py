@@ -8,7 +8,7 @@ Symphony logout
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: authenticator-api-public.yaml
-# Updated at: 2022-09-07T03:04:03.701680
+# Updated at: 2022-09-07T03:10:46.579677
 
 from typing import Any, Dict, List, Union  # noqa
 

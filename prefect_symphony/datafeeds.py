@@ -8,7 +8,7 @@ Symphony datafeeds
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-09-07T03:04:02.548094
+# Updated at: 2022-09-07T03:10:45.432913
 
 from typing import Any, Dict, List, Union  # noqa
 

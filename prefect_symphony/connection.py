@@ -8,7 +8,7 @@ Symphony connection
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: pod-api-public.yaml
-# Updated at: 2022-09-07T03:04:07.531298
+# Updated at: 2022-09-07T03:10:50.386466
 
 from typing import Any, Dict, List, Union  # noqa
 
