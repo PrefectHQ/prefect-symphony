@@ -8,7 +8,7 @@ Symphony audittrail
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-08-26T18:55:00.232390
+# Updated at: 2022-09-07T03:04:01.816140
 
 from typing import Any, Dict, List, Union  # noqa
 

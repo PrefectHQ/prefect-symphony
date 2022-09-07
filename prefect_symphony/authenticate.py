@@ -8,7 +8,7 @@ Symphony authenticate
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: authenticator-api-public.yaml
-# Updated at: 2022-08-26T18:55:01.150018
+# Updated at: 2022-09-07T03:04:03.701248
 
 from typing import Any, Dict, List, Union  # noqa
 

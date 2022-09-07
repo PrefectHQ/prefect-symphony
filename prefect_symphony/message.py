@@ -8,7 +8,7 @@ Symphony message
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-08-26T18:55:00.239318
+# Updated at: 2022-09-07T03:04:01.825733
 
 from typing import Any, Dict, List, Union  # noqa
 
@@ -109,7 +109,6 @@ async def get_v1_message_search(
 
 @task
 async def post_v1_message_search(
-    query: str,
     session_token: str,
     key_manager_token: str,
     symphony_credentials: "SymphonyCredentials",
@@ -117,13 +116,21 @@ async def post_v1_message_search(
     limit: int = None,
     scope: str = None,
     sort_dir: str = None,
+    text: str = None,
+    stream_id: str = None,
+    stream_type: str = None,
+    author: int = None,
+    hashtag: str = None,
+    cashtag: str = None,
+    mention: int = None,
+    signal: str = None,
+    from_date: int = None,
+    to_date: int = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Search messages according to the specified criteria.
 
     Args:
-        query:
-            The search query. See above for the query syntax.
         session_token:
             Session authentication token.
         key_manager_token:
@@ -140,6 +147,29 @@ async def post_v1_message_search(
             exclusively apply to Symphony content or to one Connector.
         sort_dir:
             Messages sort direction : ASC or DESC (default to DESC).
+        text:
+            Search for messages containing this text. Requires streamId to be
+            specified.
+        stream_id:
+            Search for messages sent to this stream.
+        stream_type:
+            Search for messages sent to this type of streams. Accepted values are
+            CHAT, IM, MIM, ROOM, POST.
+        author:
+            Search for messages sent by this user ID.
+        hashtag:
+            Search for messages containing this hashtag.
+        cashtag:
+            Search for messages containing this cashtag.
+        mention:
+            Search for messages mentioning this user ID.
+        signal:
+            Search for messages matching this signal. Can only be combined with date
+            filtering and paging parameters.
+        from_date:
+            Search for messages sent on or after this timestamp.
+        to_date:
+            Search for messages sent before this timestamp.
 
     Returns:
         A dict of the response.
@@ -169,7 +199,6 @@ async def post_v1_message_search(
     }
 
     params = {
-        "query": query,
         "skip": skip,
         "limit": limit,
         "scope": scope,
@@ -178,11 +207,25 @@ async def post_v1_message_search(
         "key_manager_token": key_manager_token,
     }
 
+    json_payload = {
+        "text": text,
+        "stream_id": stream_id,
+        "stream_type": stream_type,
+        "author": author,
+        "hashtag": hashtag,
+        "cashtag": cashtag,
+        "mention": mention,
+        "signal": signal,
+        "from_date": from_date,
+        "to_date": to_date,
+    }
+
     response = await execute_endpoint.fn(
         endpoint,
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -255,9 +298,9 @@ async def get_v1_message_id(
 @task
 async def post_v4_message_blast(
     session_token: str,
-    sids: List[str],
     symphony_credentials: "SymphonyCredentials",
     key_manager_token: str = None,
+    sids: List[str] = None,
     message: str = None,
     data: str = None,
     version: str = None,
@@ -284,12 +327,12 @@ async def post_v4_message_blast(
     Args:
         session_token:
             Authorization token used to make delegated calls.
-        sids:
-            A comma-separated list of Stream IDs.
         symphony_credentials:
             Credentials to use for authentication with Symphony.
         key_manager_token:
             Key Manager authentication token.
+        sids:
+            A comma-separated list of Stream IDs.
         message:
             The message payload in MessageML.
         data:
@@ -332,6 +375,9 @@ async def post_v4_message_blast(
     params = {
         "session_token": session_token,
         "key_manager_token": key_manager_token,
+    }
+
+    json_payload = {
         "sids": sids,
         "message": message,
         "data": data,
@@ -345,6 +391,7 @@ async def post_v4_message_blast(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -355,7 +402,6 @@ async def post_v4_message_blast(
 async def post_v4_message_import(
     session_token: str,
     key_manager_token: str,
-    message_list: str,
     symphony_credentials: "SymphonyCredentials",
 ) -> Dict[str, Any]:  # pragma: no cover
     """
@@ -372,8 +418,6 @@ async def post_v4_message_import(
             Session authentication token.
         key_manager_token:
             Key Manager authentication token.
-        message_list:
-
         symphony_credentials:
             Credentials to use for authentication with Symphony.
 
@@ -405,7 +449,6 @@ async def post_v4_message_import(
     params = {
         "session_token": session_token,
         "key_manager_token": key_manager_token,
-        "message_list": message_list,
     }
 
     response = await execute_endpoint.fn(

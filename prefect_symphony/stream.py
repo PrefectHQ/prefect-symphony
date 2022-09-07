@@ -8,13 +8,14 @@ Symphony stream
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-08-26T18:55:00.242184
+# Updated at: 2022-09-07T03:04:01.828947
 
 from typing import Any, Dict, List, Union  # noqa
 
 from prefect import task
 
 from prefect_symphony import SymphonyCredentials
+from prefect_symphony.models import stream as models
 from prefect_symphony.rest import HTTPMethod, _unpack_contents, execute_endpoint
 
 
@@ -91,9 +92,10 @@ async def get_v1_stream_sid_attachment(
 async def post_v3_stream_sid_share(
     sid: str,
     session_token: str,
-    share_content: str,
     symphony_credentials: "SymphonyCredentials",
     key_manager_token: str = None,
+    type: str = None,
+    content: "models.ShareArticle" = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Given a 3rd party content (eg. news article), it can share to the given stream.
@@ -104,12 +106,44 @@ async def post_v3_stream_sid_share(
             Sid used in formatting the endpoint URL.
         session_token:
             Session authentication token.
-        share_content:
-
         symphony_credentials:
             Credentials to use for authentication with Symphony.
         key_manager_token:
             Key Manager authentication token.
+        type:
+            Type of content to be shared.  Currently only support
+            'com.symphony.sharing.article'.
+        content:
+             Key-values:
+            - articleId:
+                An ID for this article that should be unique to the calling
+                application.  Either an articleId or an articleUrl is
+                required.
+            - title:
+                The title of the article.
+            - subTitle:
+                The subtitle of the article.
+            - message:
+                The message text that can be send along with the shared
+                article.
+            - publisher:
+                Publisher of the article.
+            - publishDate:
+                Article publish date in unix timestamp.
+            - thumbnailUrl:
+                Url to the thumbnail image.
+            - author:
+                Author of the article.
+            - articleUrl:
+                Url to the article.
+            - summary:
+                Preview summary of the article.
+            - appId:
+                App ID of the calling application.
+            - appName:
+                App name of the calling application.
+            - appIconUrl:
+                App icon url of the calling application.
 
     Returns:
         A dict of the response.
@@ -139,7 +173,11 @@ async def post_v3_stream_sid_share(
         "sid": sid,
         "session_token": session_token,
         "key_manager_token": key_manager_token,
-        "share_content": share_content,
+    }
+
+    json_payload = {
+        "type": type,
+        "content": content,
     }
 
     response = await execute_endpoint.fn(
@@ -147,6 +185,7 @@ async def post_v3_stream_sid_share(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -251,15 +290,15 @@ async def post_v4_stream_sid_message_create(
     preview: str = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
-    Post a new message to the given stream. The stream can be a chatroom, an IM or a
+    Post a new message to the given stream. The stream can be a chatroom,,an IM or a
     multiparty IM.  You may include an attachment on the message.  The message
     can be provided as MessageMLV2 or PresentationML. Both formats support
     Freemarker templates.  The optional parameter 'data' can be used to provide
     a JSON payload containing entity data. If the message contains explicit
     references to entity data (in 'data-entity-id' element attributes), this
     parameter is required.  If the message is in MessageML and fails schema
-    validation a client error results  If the message is sent then 200 is
-    returned.  Regarding authentication, you must either use the sessionToken
+    validation a client error will be returned.  If the message is sent then 200
+    is returned.  Regarding authentication, you must either use the sessionToken
     which was created for delegated app access or both the sessionToken and
     keyManagerToken together.
 
@@ -314,6 +353,9 @@ async def post_v4_stream_sid_message_create(
         "sid": sid,
         "session_token": session_token,
         "key_manager_token": key_manager_token,
+    }
+
+    json_payload = {
         "message": message,
         "data": data,
         "version": version,
@@ -326,6 +368,7 @@ async def post_v4_stream_sid_message_create(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -376,8 +419,7 @@ async def post_v4_stream_sid_message_mid_update(
             to the latest supported version.
         silent:
             Optional boolean field that will determine if the user/s should receive
-            the message as read or not (true by default). Since Agent
-            20.14.
+            the message as read or not (true by default).
 
     Returns:
         A dict of the response.
@@ -410,6 +452,9 @@ async def post_v4_stream_sid_message_mid_update(
         "mid": mid,
         "session_token": session_token,
         "key_manager_token": key_manager_token,
+    }
+
+    json_payload = {
         "message": message,
         "data": data,
         "version": version,
@@ -421,6 +466,7 @@ async def post_v4_stream_sid_message_mid_update(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)

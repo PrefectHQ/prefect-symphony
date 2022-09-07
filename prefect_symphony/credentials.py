@@ -60,7 +60,7 @@ class SymphonyCredentials(Block):
         )
 
         client_kwargs = self.client_kwargs or {}
-        client_kwargs["header"] = {
+        client_kwargs["headers"] = {
             "Authorization": f"Bearer {self.token.get_secret_value()}"
         }
         client = AsyncClient(base_url=base_url, **client_kwargs)

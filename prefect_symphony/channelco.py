@@ -8,7 +8,7 @@ Symphony channelco
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: community-connect-public-api.yaml
-# Updated at: 2022-08-26T18:55:01.941392
+# Updated at: 2022-09-07T03:04:04.730381
 
 from typing import Any, Dict, List, Union  # noqa
 

@@ -8,13 +8,14 @@ Symphony dlp
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-08-26T18:55:00.234362
+# Updated at: 2022-09-07T03:04:01.819044
 
 from typing import Any, Dict, List, Union  # noqa
 
 from prefect import task
 
 from prefect_symphony import SymphonyCredentials
+from prefect_symphony.models import dlp as models
 from prefect_symphony.rest import HTTPMethod, _unpack_contents, execute_endpoint
 
 
@@ -90,8 +91,9 @@ async def get_v1_dlp_dictionaries(
 async def post_v1_dlp_dictionaries(
     session_token: str,
     key_manager_token: str,
-    body: str,
     symphony_credentials: "SymphonyCredentials",
+    name: str = None,
+    type: str = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Creates a dictionary with basic metadata and no content. Only 'name' and 'type'
@@ -102,10 +104,14 @@ async def post_v1_dlp_dictionaries(
             Session authentication token.
         key_manager_token:
             Key Manager authentication token.
-        body:
-
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        name:
+            The name of dictionary.
+        type:
+            The type of dictionary, which specify the content is a list of words or
+            a list of regexes. By default set to 'Word' if not
+            specified. Possible values - Word, Regex.
 
     Returns:
         A dict of the response.
@@ -135,7 +141,11 @@ async def post_v1_dlp_dictionaries(
     params = {
         "session_token": session_token,
         "key_manager_token": key_manager_token,
-        "body": body,
+    }
+
+    json_payload = {
+        "name": name,
+        "type": type,
     }
 
     response = await execute_endpoint.fn(
@@ -143,6 +153,7 @@ async def post_v1_dlp_dictionaries(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -171,7 +182,7 @@ async def get_v1_dlp_dictionaries_dict_id(
             Credentials to use for authentication with Symphony.
         dict_version:
             If set to be valid dictionary version number, will return dictionary
-            metadata with specified version. Otherwise, return the
+            metadata with specified version.  Otherwise, return the
             latest dictionary metadata.
 
     Returns:
@@ -221,8 +232,8 @@ async def put_v1_dlp_dictionaries_dict_id(
     session_token: str,
     key_manager_token: str,
     dict_id: str,
-    body: str,
     symphony_credentials: "SymphonyCredentials",
+    name: str = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Updates the dictionary's basic metadata without content. This API cannot be used
@@ -236,10 +247,10 @@ async def put_v1_dlp_dictionaries_dict_id(
             Key Manager authentication token.
         dict_id:
             Dict id used in formatting the endpoint URL.
-        body:
-
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        name:
+            The name of dictionary.
 
     Returns:
         A dict of the response.
@@ -269,7 +280,10 @@ async def put_v1_dlp_dictionaries_dict_id(
         "session_token": session_token,
         "key_manager_token": key_manager_token,
         "dict_id": dict_id,
-        "body": body,
+    }
+
+    json_payload = {
+        "name": name,
     }
 
     response = await execute_endpoint.fn(
@@ -277,6 +291,7 @@ async def put_v1_dlp_dictionaries_dict_id(
         symphony_credentials,
         http_method=HTTPMethod.PUT,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -366,7 +381,7 @@ async def get_v1_dlp_dictionaries_dict_id_data_download(
             Credentials to use for authentication with Symphony.
         dict_version:
             If set to be valid dictionary version number, will return dictionary
-            with specified version. Otherwise, return the latest
+            with specified version.  Otherwise, return the latest
             dictionary.
 
     Returns:
@@ -416,8 +431,8 @@ async def post_v1_dlp_dictionaries_dict_id_data_upload(
     session_token: str,
     key_manager_token: str,
     dict_id: str,
-    data: str,
     symphony_credentials: "SymphonyCredentials",
+    data: str = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Override dictionary content with provided content.
@@ -429,10 +444,10 @@ async def post_v1_dlp_dictionaries_dict_id_data_upload(
             Key Manager authentication token.
         dict_id:
             Dict id used in formatting the endpoint URL.
-        data:
-
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        data:
+
 
     Returns:
         A dict of the response.
@@ -462,6 +477,9 @@ async def post_v1_dlp_dictionaries_dict_id_data_upload(
         "session_token": session_token,
         "key_manager_token": key_manager_token,
         "dict_id": dict_id,
+    }
+
+    json_payload = {
         "data": data,
     }
 
@@ -470,6 +488,7 @@ async def post_v1_dlp_dictionaries_dict_id_data_upload(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -547,8 +566,12 @@ async def get_v1_dlp_policies(
 async def post_v1_dlp_policies(
     session_token: str,
     key_manager_token: str,
-    body: str,
     symphony_credentials: "SymphonyCredentials",
+    content_types: List[str] = None,
+    dictionary_ids: List[str] = None,
+    name: str = None,
+    scopes: List[str] = None,
+    type: str = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Creates a new policy with dictionary references.  At the time of policy
@@ -561,10 +584,25 @@ async def post_v1_dlp_policies(
             Session authentication token.
         key_manager_token:
             Key Manager authentication token.
-        body:
-            Details about the policy that should be created.
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        content_types:
+            The list of content types that policy should apply to. Cannot be empty.
+            Policy content types could be either of 'Messages',
+            'RoomMeta', 'SignalMeta'. Default is set to ['Messages'] if
+            not specified.
+        dictionary_ids:
+            List of dictionaries Ids for the policy.
+        name:
+            Unique name of a policy, max 30 characters. Cannot be empty. All the
+            leading and trailing blank spaces are trimmed.
+        scopes:
+            List of communication scopes. Possible values are 'Internal' (for
+            Internal conversations) or 'External' (for External
+            conversations). You can apply both scopes if you set it to
+            ['Internal', 'External'].
+        type:
+            Type of policy. Possible values 'Block' or 'Warn'.
 
     Returns:
         A dict of the response.
@@ -594,7 +632,14 @@ async def post_v1_dlp_policies(
     params = {
         "session_token": session_token,
         "key_manager_token": key_manager_token,
-        "body": body,
+    }
+
+    json_payload = {
+        "content_types": content_types,
+        "dictionary_ids": dictionary_ids,
+        "name": name,
+        "scopes": scopes,
+        "type": type,
     }
 
     response = await execute_endpoint.fn(
@@ -602,6 +647,7 @@ async def post_v1_dlp_policies(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -630,7 +676,7 @@ async def get_v1_dlp_policies_policy_id(
             Credentials to use for authentication with Symphony.
         policy_version:
             Optional parameter, if set to be valid policy version number,  will
-            return policy with specified policyVersion. Otherwise,
+            return policy with specified policyVersion.  Otherwise,
             return the latest policy.
 
     Returns:
@@ -680,8 +726,12 @@ async def put_v1_dlp_policies_policy_id(
     session_token: str,
     key_manager_token: str,
     policy_id: str,
-    body: str,
     symphony_credentials: "SymphonyCredentials",
+    content_types: List[str] = None,
+    dictionary_ids: List[str] = None,
+    name: str = None,
+    scopes: List[str] = None,
+    type: str = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Update the policy (name, type, contentTypes, scopes) and also the dictionaries
@@ -696,10 +746,25 @@ async def put_v1_dlp_policies_policy_id(
             Key Manager authentication token.
         policy_id:
             Policy id used in formatting the endpoint URL.
-        body:
-
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        content_types:
+            The list of content types that policy should apply to. Cannot be empty.
+            Policy content types could be either of 'Messages',
+            'RoomMeta', 'SignalMeta'. Default is set to ['Messages'] if
+            not specified.
+        dictionary_ids:
+            List of dictionaries Ids for the policy.
+        name:
+            Unique name of a policy, max 30 characters. Cannot be empty. All the
+            leading and trailing blank spaces are trimmed.
+        scopes:
+            List of communication scopes. Possible values are 'Internal' (for
+            Internal conversations) or 'External' (for External
+            conversations). You can apply both scopes if you set it to
+            ['Internal', 'External'].
+        type:
+            Type of policy. Possible values 'Block' or 'Warn'.
 
     Returns:
         A dict of the response.
@@ -729,7 +794,14 @@ async def put_v1_dlp_policies_policy_id(
         "session_token": session_token,
         "key_manager_token": key_manager_token,
         "policy_id": policy_id,
-        "body": body,
+    }
+
+    json_payload = {
+        "content_types": content_types,
+        "dictionary_ids": dictionary_ids,
+        "name": name,
+        "scopes": scopes,
+        "type": type,
     }
 
     response = await execute_endpoint.fn(
@@ -737,6 +809,7 @@ async def put_v1_dlp_policies_policy_id(
         symphony_credentials,
         http_method=HTTPMethod.PUT,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -937,7 +1010,7 @@ async def get_v1_dlp_violations_message(
     limit: int = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
-    TBD.
+    Get violations as a result of policy enforcement on messages.
 
     Args:
         start_time:
@@ -1018,7 +1091,7 @@ async def get_v1_dlp_violations_signal(
     limit: int = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
-    TBD.
+    Get violations as a result of policy enforcement on signals.
 
     Args:
         start_time:
@@ -1099,7 +1172,7 @@ async def get_v1_dlp_violations_stream(
     limit: int = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
-    TBD.
+    Get violations as a result of policy enforcement on streams.
 
     Args:
         start_time:
@@ -1240,8 +1313,10 @@ async def get_v3_dlp_policies(
 async def post_v3_dlp_policies(
     session_token: str,
     key_manager_token: str,
-    body: str,
     symphony_credentials: "SymphonyCredentials",
+    name: str = None,
+    scopes: List[str] = None,
+    applies_to: List["models.V3DLPPolicyAppliesTo"] = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Creates a new policy with dictionary references. At the time of policy creation,
@@ -1254,10 +1329,18 @@ async def post_v3_dlp_policies(
             Session authentication token.
         key_manager_token:
             Key Manager authentication token.
-        body:
-            Details about the policy that should be created.
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        name:
+            Unique name of a policy, max 30 characters. Cannot be empty. All the
+            leading and trailing blank spaces are trimmed.
+        scopes:
+            List of communication scopes. Possible values are 'Internal' (for
+            Internal conversations) or 'External' (for External
+            conversations). You can apply both scopes if you set it to
+            ['Internal', 'External'].
+        applies_to:
+
 
     Returns:
         A dict of the response.
@@ -1287,7 +1370,12 @@ async def post_v3_dlp_policies(
     params = {
         "session_token": session_token,
         "key_manager_token": key_manager_token,
-        "body": body,
+    }
+
+    json_payload = {
+        "name": name,
+        "scopes": scopes,
+        "applies_to": applies_to,
     }
 
     response = await execute_endpoint.fn(
@@ -1295,6 +1383,7 @@ async def post_v3_dlp_policies(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -1323,7 +1412,7 @@ async def get_v3_dlp_policies_policy_id(
             Credentials to use for authentication with Symphony.
         policy_version:
             Optional parameter, if set to be valid policy version number,  will
-            return policy with specified policyVersion. Otherwise,
+            return policy with specified policyVersion.  Otherwise,
             return the latest policy.
 
     Returns:
@@ -1556,8 +1645,10 @@ async def post_v3_dlp_policies_policy_id_update(
     session_token: str,
     key_manager_token: str,
     policy_id: str,
-    body: str,
     symphony_credentials: "SymphonyCredentials",
+    name: str = None,
+    scopes: List[str] = None,
+    applies_to: List["models.V3DLPPolicyAppliesTo"] = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Update the policy (name, type, contentTypes, scopes) and also the dictionaries
@@ -1572,10 +1663,18 @@ async def post_v3_dlp_policies_policy_id_update(
             Key Manager authentication token.
         policy_id:
             Policy id used in formatting the endpoint URL.
-        body:
-
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        name:
+            Unique name of a policy, max 30 characters. Cannot be empty. All the
+            leading and trailing blank spaces are trimmed.
+        scopes:
+            List of communication scopes. Possible values are 'Internal' (for
+            Internal conversations) or 'External' (for External
+            conversations). You can apply both scopes if you set it to
+            ['Internal', 'External'].
+        applies_to:
+
 
     Returns:
         A dict of the response.
@@ -1605,7 +1704,12 @@ async def post_v3_dlp_policies_policy_id_update(
         "session_token": session_token,
         "key_manager_token": key_manager_token,
         "policy_id": policy_id,
-        "body": body,
+    }
+
+    json_payload = {
+        "name": name,
+        "scopes": scopes,
+        "applies_to": applies_to,
     }
 
     response = await execute_endpoint.fn(
@@ -1613,6 +1717,7 @@ async def post_v3_dlp_policies_policy_id_update(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)

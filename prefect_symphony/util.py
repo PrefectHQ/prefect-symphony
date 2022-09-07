@@ -8,7 +8,7 @@ Symphony util
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-08-26T18:55:00.242480
+# Updated at: 2022-09-07T03:04:01.829506
 
 from typing import Any, Dict, List, Union  # noqa
 
@@ -22,8 +22,8 @@ from prefect_symphony.rest import HTTPMethod, _unpack_contents, execute_endpoint
 async def post_v1_util_echo(
     session_token: str,
     key_manager_token: str,
-    echo_input: str,
     symphony_credentials: "SymphonyCredentials",
+    message: str = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Test endpoint, returns input.
@@ -33,10 +33,10 @@ async def post_v1_util_echo(
             Session authentication token.
         key_manager_token:
             Key Manager authentication token.
-        echo_input:
-            Message in plain text.
         symphony_credentials:
             Credentials to use for authentication with Symphony.
+        message:
+
 
     Returns:
         A dict of the response.
@@ -66,7 +66,10 @@ async def post_v1_util_echo(
     params = {
         "session_token": session_token,
         "key_manager_token": key_manager_token,
-        "echo_input": echo_input,
+    }
+
+    json_payload = {
+        "message": message,
     }
 
     response = await execute_endpoint.fn(
@@ -74,6 +77,7 @@ async def post_v1_util_echo(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)

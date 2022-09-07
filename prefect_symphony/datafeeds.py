@@ -8,7 +8,7 @@ Symphony datafeeds
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-08-26T18:55:00.249127
+# Updated at: 2022-09-07T03:04:02.548094
 
 from typing import Any, Dict, List, Union  # noqa
 
@@ -16,71 +16,6 @@ from prefect import task
 
 from prefect_symphony import SymphonyCredentials
 from prefect_symphony.rest import HTTPMethod, _unpack_contents, execute_endpoint
-
-
-@task
-async def create_datafeed(
-    session_token: str,
-    key_manager_token: str,
-    symphony_credentials: "SymphonyCredentials",
-    body: str = None,
-) -> Dict[str, Any]:  # pragma: no cover
-    """
-    _Available on Agent 2.57.0 and above._  The datafeed provides messages and
-    events from all conversations that the user is in. The types of events
-    surfaced in the datafeed can be found in the Real Time Events list. (see
-    definition on top of the file)  Returns the ID of the datafeed that has just
-    been created. This ID should then be used as input to the Read
-    Messages/Events Stream v4 endpoint.
-
-    Args:
-        session_token:
-            Session authentication token.
-        key_manager_token:
-            Key Manager authentication token.
-        symphony_credentials:
-            Credentials to use for authentication with Symphony.
-        body:
-
-
-    Returns:
-        A dict of the response.
-
-    <h4>API Endpoint:</h4>
-    `/v5/datafeeds`
-
-    <h4>API Responses:</h4>
-    | Response | Description |
-    | --- | --- |
-    | 201 | Datafeed sucessfully created. |
-    | 400 | Bad request. |
-    | 401 | Unauthorized. |
-    | 500 | Internal server error. |
-    """  # noqa
-    endpoint = "/v5/datafeeds"  # noqa
-
-    responses = {
-        201: "Datafeed sucessfully created.",  # noqa
-        400: "Bad request.",  # noqa
-        401: "Unauthorized.",  # noqa
-        500: "Internal server error.",  # noqa
-    }
-
-    params = {
-        "session_token": session_token,
-        "key_manager_token": key_manager_token,
-        "body": body,
-    }
-
-    response = await execute_endpoint.fn(
-        endpoint,
-        symphony_credentials,
-        http_method=HTTPMethod.POST,
-        params=params,
-    )
-
-    contents = _unpack_contents(response, responses)
-    return contents
 
 
 @task
@@ -143,6 +78,75 @@ async def list_datafeed(
         symphony_credentials,
         http_method=HTTPMethod.GET,
         params=params,
+    )
+
+    contents = _unpack_contents(response, responses)
+    return contents
+
+
+@task
+async def create_datafeed(
+    session_token: str,
+    key_manager_token: str,
+    symphony_credentials: "SymphonyCredentials",
+    tag: str = None,
+) -> Dict[str, Any]:  # pragma: no cover
+    """
+    _Available on Agent 2.57.0 and above._  The datafeed provides messages and
+    events from all conversations that the user is in. The types of events
+    surfaced in the datafeed can be found in the Real Time Events list. (see
+    definition on top of the file)  Returns the ID of the datafeed that has just
+    been created. This ID should then be used as input to the Read
+    Messages/Events Stream v4 endpoint.
+
+    Args:
+        session_token:
+            Session authentication token.
+        key_manager_token:
+            Key Manager authentication token.
+        symphony_credentials:
+            Credentials to use for authentication with Symphony.
+        tag:
+            A unique identifier to ensure uniqueness of the datafeed.
+
+    Returns:
+        A dict of the response.
+
+    <h4>API Endpoint:</h4>
+    `/v5/datafeeds`
+
+    <h4>API Responses:</h4>
+    | Response | Description |
+    | --- | --- |
+    | 201 | Datafeed sucessfully created. |
+    | 400 | Bad request. |
+    | 401 | Unauthorized. |
+    | 500 | Internal server error. |
+    """  # noqa
+    endpoint = "/v5/datafeeds"  # noqa
+
+    responses = {
+        201: "Datafeed sucessfully created.",  # noqa
+        400: "Bad request.",  # noqa
+        401: "Unauthorized.",  # noqa
+        500: "Internal server error.",  # noqa
+    }
+
+    params = {
+        "session_token": session_token,
+        "key_manager_token": key_manager_token,
+    }
+
+    json_payload = {
+        "tag": tag,
+    }
+
+    response = await execute_endpoint.fn(
+        endpoint,
+        symphony_credentials,
+        http_method=HTTPMethod.POST,
+        params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -218,6 +222,7 @@ async def read_datafeed(
     key_manager_token: str,
     symphony_credentials: "SymphonyCredentials",
     ack_id: str = None,
+    update_presence: bool = True,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     _Available on Agent 2.57.0 and above._  The datafeed provides messages and
@@ -239,7 +244,12 @@ async def read_datafeed(
         symphony_credentials:
             Credentials to use for authentication with Symphony.
         ack_id:
-            ackId received from last POST Base64 encoded.
+            A unique id for events that can be deleted from a client's. Empty for
+            the first read. If set to null or missing, it will be
+            considered empty feed.
+        update_presence:
+            Set to false to avoid updating the user's presence when reading events.
+            Default is true.
 
     Returns:
         A dict of the response.
@@ -269,7 +279,11 @@ async def read_datafeed(
         "datafeed_id": datafeed_id,
         "session_token": session_token,
         "key_manager_token": key_manager_token,
+    }
+
+    json_payload = {
         "ack_id": ack_id,
+        "update_presence": update_presence,
     }
 
     response = await execute_endpoint.fn(
@@ -277,6 +291,7 @@ async def read_datafeed(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)

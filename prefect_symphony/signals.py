@@ -8,7 +8,7 @@ Symphony signals
 # is outdated, rerun scripts/generate.py.
 
 # OpenAPI spec: agent-api-public.yaml
-# Updated at: 2022-08-26T18:55:00.239910
+# Updated at: 2022-09-07T03:04:01.826530
 
 from typing import Any, Dict, List, Union  # noqa
 
@@ -21,9 +21,12 @@ from prefect_symphony.rest import HTTPMethod, _unpack_contents, execute_endpoint
 @task
 async def post_v1_signals_create(
     session_token: str,
-    signal: str,
     symphony_credentials: "SymphonyCredentials",
     key_manager_token: str = None,
+    name: str = None,
+    query: str = None,
+    visible_on_profile: bool = None,
+    company_wide: bool = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Create a signal.
@@ -31,12 +34,22 @@ async def post_v1_signals_create(
     Args:
         session_token:
             Session authentication token.
-        signal:
-            Signal definition.
         symphony_credentials:
             Credentials to use for authentication with Symphony.
         key_manager_token:
             Key Manager authentication token.
+        name:
+            Signal name.
+        query:
+            The query used to define this signal. The query is defined as
+            'field:value' pairs combined by the operators 'AND' or 'OR'.
+            Supported fields are (case-insensitive): 'author', 'hashtag'
+            and 'cashtag'. MUST contain at least one 'hashtag' or
+            'cashtag' definition.
+        visible_on_profile:
+            Whether the signal is visible on its creator's profile.
+        company_wide:
+            Whether the signal is a push signal.
 
     Returns:
         A dict of the response.
@@ -68,7 +81,13 @@ async def post_v1_signals_create(
     params = {
         "session_token": session_token,
         "key_manager_token": key_manager_token,
-        "signal": signal,
+    }
+
+    json_payload = {
+        "name": name,
+        "query": query,
+        "visible_on_profile": visible_on_profile,
+        "company_wide": company_wide,
     }
 
     response = await execute_endpoint.fn(
@@ -76,6 +95,7 @@ async def post_v1_signals_create(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
@@ -279,7 +299,6 @@ async def post_v1_signals_id_subscribe(
     symphony_credentials: "SymphonyCredentials",
     key_manager_token: str = None,
     pushed: bool = None,
-    users: List[int] = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Subscribe to a Signal.
@@ -295,8 +314,6 @@ async def post_v1_signals_id_subscribe(
             Key Manager authentication token.
         pushed:
             Prevent the user to unsubscribe (only for bulk subscription).
-        users:
-            UserIds to subscribe (only for bulk subscription).
 
     Returns:
         A dict of the response.
@@ -327,7 +344,6 @@ async def post_v1_signals_id_subscribe(
         "key_manager_token": key_manager_token,
         "id": id,
         "pushed": pushed,
-        "users": users,
     }
 
     response = await execute_endpoint.fn(
@@ -417,7 +433,6 @@ async def post_v1_signals_id_unsubscribe(
     id: str,
     symphony_credentials: "SymphonyCredentials",
     key_manager_token: str = None,
-    users: List[int] = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Unsubscribe to a Signal.
@@ -431,8 +446,6 @@ async def post_v1_signals_id_unsubscribe(
             Credentials to use for authentication with Symphony.
         key_manager_token:
             Key Manager authentication token.
-        users:
-            UserIds to unsubscribe (only for bulk unsubscription).
 
     Returns:
         A dict of the response.
@@ -462,7 +475,6 @@ async def post_v1_signals_id_unsubscribe(
         "session_token": session_token,
         "key_manager_token": key_manager_token,
         "id": id,
-        "users": users,
     }
 
     response = await execute_endpoint.fn(
@@ -480,9 +492,12 @@ async def post_v1_signals_id_unsubscribe(
 async def post_v1_signals_id_update(
     session_token: str,
     id: str,
-    signal: str,
     symphony_credentials: "SymphonyCredentials",
     key_manager_token: str = None,
+    name: str = None,
+    query: str = None,
+    visible_on_profile: bool = None,
+    company_wide: bool = None,
 ) -> Dict[str, Any]:  # pragma: no cover
     """
     Update a signal.
@@ -492,12 +507,22 @@ async def post_v1_signals_id_update(
             Session authentication token.
         id:
             Id used in formatting the endpoint URL.
-        signal:
-            Signal definition.
         symphony_credentials:
             Credentials to use for authentication with Symphony.
         key_manager_token:
             Key Manager authentication token.
+        name:
+            Signal name.
+        query:
+            The query used to define this signal. The query is defined as
+            'field:value' pairs combined by the operators 'AND' or 'OR'.
+            Supported fields are (case-insensitive): 'author', 'hashtag'
+            and 'cashtag'. MUST contain at least one 'hashtag' or
+            'cashtag' definition.
+        visible_on_profile:
+            Whether the signal is visible on its creator's profile.
+        company_wide:
+            Whether the signal is a push signal.
 
     Returns:
         A dict of the response.
@@ -529,7 +554,13 @@ async def post_v1_signals_id_update(
         "session_token": session_token,
         "key_manager_token": key_manager_token,
         "id": id,
-        "signal": signal,
+    }
+
+    json_payload = {
+        "name": name,
+        "query": query,
+        "visible_on_profile": visible_on_profile,
+        "company_wide": company_wide,
     }
 
     response = await execute_endpoint.fn(
@@ -537,6 +568,7 @@ async def post_v1_signals_id_update(
         symphony_credentials,
         http_method=HTTPMethod.POST,
         params=params,
+        json=json_payload,
     )
 
     contents = _unpack_contents(response, responses)
