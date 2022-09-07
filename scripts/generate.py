@@ -33,11 +33,11 @@ REPO_DIRECTORY = THIS_DIRECTORY.parent
 # UPDATE THESE AS DESIRED
 service_name = "Symphony"
 paths_or_urls = [
-    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/agent/agent-api-public.yaml",
-    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/authenticator/authenticator-api-public.yaml",
-    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/community-connect/community-connect-public-api.yaml",
-    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/login/login-api-public.yaml",
-    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/pod/pod-api-public.yaml",
+    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/agent/agent-api-public.yaml",  # noqa
+    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/authenticator/authenticator-api-public.yaml",  # noqa
+    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/community-connect/community-connect-public-api.yaml",  # noqa
+    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/login/login-api-public.yaml",  # noqa
+    "https://raw.githubusercontent.com/finos/symphony-api-spec/master/pod/pod-api-public.yaml",  # noqa
 ]  # At least one path or url must be specified!
 routes = None
 overwrite = True
@@ -58,5 +58,5 @@ populate_collection_repo(
     overwrite=overwrite,
     preprocess_fn=preprocess_fn,
     repo_directory=REPO_DIRECTORY,
-    base_url="https://{pod-subdomain}.symphony.com/login/pubkey/authenticate"
+    base_url="https://{pod_subdomain}.symphony.com/login/pubkey/authenticate",
 )
